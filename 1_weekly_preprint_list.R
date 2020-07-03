@@ -2,17 +2,20 @@ library(tidyverse)
 library(jsonlite)
 library(lubridate)
 
-get_weekly_preprint_list <- function(start_date, end_date)
+
+download_preprint_json_list <- function(save_filename)
 {
   print("Download latest json file from biorxiv.")
   #download latest JSON file
+
   biorxiv_json_url <- "https://connect.biorxiv.org/relate/collection_json.php?grp=181"
-  save_filename <- paste0("./biorxiv_json/biorxiv_medrxiv_covid_papers_", Sys.Date(),".json")
   download.file(biorxiv_json_url, save_filename)
+}
   
-  
+filter_weekly_preprint_list <- function(start_date, end_date, json_file)
+{
   #load metadata
-  preprint_metadata <- fromJSON(save_filename)
+  preprint_metadata <- fromJSON(json_file)
   preprint_metadata_tbl <- preprint_metadata$rels %>% as_tibble()
   
 

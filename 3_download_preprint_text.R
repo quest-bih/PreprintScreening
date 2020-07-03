@@ -14,7 +14,7 @@ download_biorxiv_text <- function(preprint_list, pdf_html_folder)
                             doi %>% str_replace_all(fixed("/"), "+"),
                             ".txt")
     
-    com <- paste0("python weekly_code/biorxiv_extractor.py ", doi, 
+    com <- paste0("python biorxiv_extractor.py ", doi, 
                   " txt ", save_filename)
     
     tryCatch({
