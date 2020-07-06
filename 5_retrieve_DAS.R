@@ -10,18 +10,20 @@ get_medrxiv_DAS <- function(weekly_list_filename, save_filename)
     filter(site == "medrxiv")
   
   print("Retrieve data availibility statements from medrxiv website.")
-  DAS_table <- retrieve_DAS(preprint_metadata_weekly$URL)
+  DAS_table <- retrieve_DAS(preprint_metadata_weekly$URL, preprint_metadata_weekly$doi)
   write_csv(DAS_table, save_filename)
 }
 
 
 
-retrieve_DAS <- function(URL_list, retry = 2)
+retrieve_DAS <- function(URL_list, doi_list, retry = 2)
 {
   DAS_list <- list()
   
-  for(URL in URL_list)
+  for(i in 1:length(URL_list))
   {
+    URL <- URL_list[i]
+    doi <- doi_list[i]
     data_availibility_statement = ""
     current_retry = retry
     
@@ -73,6 +75,7 @@ retrieve_DAS <- function(URL_list, retry = 2)
     }
     
     DAS_list[[URL]] <- tibble(URL = URL,
+                              doi = doi,
                               DAS = data_availibility_statement)
     
   }
@@ -82,20 +85,3 @@ retrieve_DAS <- function(URL_list, retry = 2)
   
   return(DAS_table)
 }
-
-
-#-------------------------------------------------------------------------------
-# try to catch missed cases
-#-------------------------------------------------------------------------------
-# 
-# DAS_table <- read_csv(save_filename)
-# 
-# DAS_missing <- DAS_table %>% filter(is.na(DAS))
-# DAS_missing_URLs <- DAS_missing$URL
-# 
-# DAS_table_missing <- get_medrxiv_DAS(DAS_missing_URLs)
-# 
-# 
-# DAS_table[DAS_table$URL %in% DAS_missing$URL,"DAS"] <- DAS_table_missing$DAS
-# 
-# write_csv(DAS_table, save_filename)
