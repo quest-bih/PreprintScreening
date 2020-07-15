@@ -1,6 +1,7 @@
 import os
 import requests
 from fastai.vision import *
+import argparse
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -145,12 +146,12 @@ def get_pdf_list(pdf_folder):
 
 
 if __name__ == '__main__':
-    paper_id = "10.1101%2b2020.06.11.20127019"
-    folder = '06_15-06_21'
-    barzooka = Barzooka()
-    # print(barzooka.detect_graph_types_from_iiif(paper_id, folder))
+    parser = argparse.ArgumentParser(description='Runs barzooka graph type detection on a set of pdfs in folder.')
+    parser.add_argument('folder', help='folder that contains the pdfs')
+    args = parser.parse_args()
 
-    current_folder = '2020-06-29_2020-07-05'
+    barzooka = Barzooka()
+    current_folder = args.folder  # '2020-06-29_2020-07-05'
     pdf_folder = '../weekly_lists/' + current_folder + '/PDFs/'
     save_filename = '../weekly_lists/' + current_folder + \
                     '/results/test_results_' + current_folder + '.csv'
@@ -173,4 +174,3 @@ if __name__ == '__main__':
         result_row.to_csv(save_filename, mode='a', header=False)
 
     barzooka_results = pd.DataFrame(barzooka_results_list)
-
