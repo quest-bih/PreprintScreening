@@ -21,7 +21,7 @@ class Barzooka(object):
                         "{}:{}.pdf/full/560,560/0/default.png?page={}"
         self.re_pg = re.compile(r'Index: \d+, Size: (\d+)')
 
-    def detect_graph_types_from_iiif(self, paper_id, folder, debug=False):
+    def detection_iiif(self, paper_id, folder, debug=False):
         """Pull images from iiif server
         """
         pages = self.__count_pages(paper_id, folder)
@@ -31,7 +31,7 @@ class Barzooka(object):
         images = [open_image(io.BytesIO(requests.get(self.iiif_url.format(folder, paper_id, pg)).content)) 
                   for pg in range(1, pages + 1)]
 
-        classes_detected = self.__detect_graph_types_from_list(images)
+        classes_detected = self.__predict_img_list(images)
         classes_detected['paper_id'] = paper_id.replace("%2b", "/")
         classes_detected['folder'] = folder
 
@@ -51,7 +51,7 @@ class Barzooka(object):
 
         return classes_detected
 
-    def __detect_graph_types_from_list(self, images):
+    def __predict_img_list(self, images):
         """Predicts graph types for each image & returns pages with bar graphs
         """
         page_predictions = np.array([self.__predict_graph_type(images[idx])
@@ -131,8 +131,46 @@ class Barzooka(object):
         return page.data.decode('utf-8')
 
 
+def get_pdf_list(pdf_folder):
+    """Searches PDF folder for all PDF filenames and returns them
+       as dataframe"""
+    pdf_list = []
+    for root, dirs, files in os.walk(pdf_folder):
+        for filename in files:
+            paper_dict = {"paper_id": filename[:-4].replace("+", "%2b")}
+            pdf_list.append(paper_dict)
+
+    pdf_table = pd.DataFrame(pdf_list)
+    return pdf_table
+
+
 if __name__ == '__main__':
     paper_id = "10.1101%2b2020.06.11.20127019"
     folder = '06_15-06_21'
     barzooka = Barzooka()
-    print(barzooka.detect_graph_types_from_iiif(paper_id, folder))
+    # print(barzooka.detect_graph_types_from_iiif(paper_id, folder))
+
+    current_folder = '2020-06-29_2020-07-05'
+    pdf_folder = '../weekly_lists/' + current_folder + '/PDFs/'
+    save_filename = '../weekly_lists/' + current_folder + \
+                    '/results/test_results_' + current_folder + '.csv'
+
+    pdf_table = get_pdf_list(pdf_folder)
+    pdf_table = pdf_table.iloc[:2]
+
+    barzooka_results_list = []
+    with open(save_filename, "w") as f:
+        f.write("bar,pie,hist,bardot,box,dot,violin,paper_id,folder\n")
+
+    for index, row in pdf_table.iterrows():
+        paper_id = row['paper_id']
+        print(paper_id)
+        barzooka_result = barzooka.detection_iiif(paper_id, current_folder)
+        barzooka_results_list.append(barzooka_result)
+
+        print(pd.DataFrame([barzooka_result]))
+        result_row = pd.DataFrame([barzooka_result])
+        result_row.to_csv(save_filename, mode='a', header=False)
+
+    barzooka_results = pd.DataFrame(barzooka_results_list)
+
