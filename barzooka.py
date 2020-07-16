@@ -27,7 +27,6 @@ class Barzooka(object):
             os.mkdir(tmp_folder)
 
         pdf_table = self.__get_pdf_list(pdf_folder, iiif_mode)
-        pdf_table = pdf_table.iloc[:2, ]
         with open(save_filename, "w") as f:
             f.write("bar,pie,hist,bardot,box,dot,violin,paper_id\n")
         for index, row in pdf_table.iterrows():
