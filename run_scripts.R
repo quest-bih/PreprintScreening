@@ -102,6 +102,6 @@ use_condaenv("fastai", required = TRUE)
 source_python("barzooka.py")
 barzooka = Barzooka()
 
-barzooka.predict_from_folder(pdf_folder, barzooka_results_filename,
+barzooka$predict_from_folder(pdf_folder, barzooka_results_filename,
                              iiif_folder, TRUE, "./tmp/")
 
