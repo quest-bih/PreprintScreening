@@ -5,6 +5,7 @@ import argparse
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+os.environ['NO_PROXY'] = '127.0.0.1'
 
 class Barzooka(object):
     def __init__(self, model_file='barzooka.pkl'):
@@ -16,7 +17,7 @@ class Barzooka(object):
         self.re_pg = re.compile(r'Index: \d+, Size: (\d+)')
 
     def predict_from_folder(self, pdf_folder, save_filename,
-                            iiif_folder='', iiif_mode=True,
+                            iiif_folder='', iiif_mode=False,
                             tmp_folder='./tmp/'):
         if(iiif_folder == '' and iiif_mode):
             raise ValueError("iiif folder argument missing")
@@ -167,22 +168,3 @@ class Barzooka(object):
         http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         page = http.request('get', url, timeout=120)
         return page.data.decode('utf-8')
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Runs barzooka graph type detection on a set of pdfs in folder.')
-    parser.add_argument('pdf_folder', help="folder that contains the pdfs")
-    parser.add_argument('save_filename', help="where the results should be saved")
-    parser.add_argument('--iiif_folder', help="folder under which pdfs are reached with the iiif server",
-                        default="")
-    parser.add_argument('--tmp_folder', help="tmp folder for extracted images from pdfs",
-                        default="./tmp/")
-    parser.add_argument("--iiif", help="use iiif server for image prediction",
-                        action="store_true")
-    args = parser.parse_args()
-
-    barzooka = Barzooka()
-    barzooka.predict_from_folder(args.pdf_folder, args.save_filename,
-                                 args.iiif_folder, args.iiif,
-                                 args.tmp_folder)

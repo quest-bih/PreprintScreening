@@ -1,6 +1,7 @@
 library(tidyverse)
 library(jsonlite)
 library(lubridate)
+library(reticulate)
 
 source("1_weekly_preprint_list.R")
 source("2_download_preprint_PDFs.R")
@@ -86,4 +87,21 @@ oddpub_results_DAS <- screen_DAS(save_filename_DAS)
 oddpub_results_full_text <- read_csv(oddpub_result_filename)
 combine_oddpub_results(oddpub_results_DAS, oddpub_results_full_text, oddpub_result_comb_filename)
 
+
+#-----------------------------------------------------------------------------------------------
+# 7 - run Barzooka
+#-----------------------------------------------------------------------------------------------
+
+barzooka_results_filename <- paste0(results_folder, 
+                                    "covid_barzooka_results_", 
+                                    start_date, "_", end_date, ".csv")
+iiif_folder = paste0(start_date, "_", end_date)
+
+#need correct conda environment to run Barzooka script
+use_condaenv("fastai", required = TRUE)
+source_python("barzooka.py")
+barzooka = Barzooka()
+
+barzooka.predict_from_folder(pdf_folder, barzooka_results_filename,
+                             iiif_folder, TRUE, "./tmp/")
 
