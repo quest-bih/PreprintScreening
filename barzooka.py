@@ -1,11 +1,12 @@
-import os, glob
+import os
+import glob
 import requests
 from fastai.vision import *
-import argparse
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 os.environ['NO_PROXY'] = '127.0.0.1'
+
 
 class Barzooka(object):
     def __init__(self, model_file='barzooka.pkl'):
@@ -32,10 +33,13 @@ class Barzooka(object):
         for index, row in pdf_table.iterrows():
             paper_id = row['paper_id']
             print(paper_id)
-            if(iiif_mode):
-                barzooka_result = self.__detection_iiif(paper_id, iiif_folder)
-            else:
-                barzooka_result = self.predict_from_file(paper_id, tmp_folder)
+            try:
+                if(iiif_mode):
+                    barzooka_result = self.__detection_iiif(paper_id, iiif_folder)
+                else:
+                    barzooka_result = self.predict_from_file(paper_id, tmp_folder)
+            except:
+                print("Could not screen pdf " + paper_id)
 
             result_row = pd.DataFrame([barzooka_result])
             result_row.to_csv(save_filename, mode='a', header=False)

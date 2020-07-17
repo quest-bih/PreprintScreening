@@ -9,6 +9,8 @@ source("3_download_preprint_text.R")
 source("4_run_oddpub.R")
 source("5_retrieve_DAS.R")
 source("6_oddpub_medrxiv_DAS.R")
+source("7_run_barzooka.R")
+source_python("barzooka.py")
 
 #set parameters - for now we assume that we run the script on Mondays
 # and retrieve the list from last week - probably need to be converted to input parameters
@@ -21,12 +23,15 @@ pdf_folder <- paste0(weekly_dir, "PDFs/")
 pdf_html_folder <- paste0(weekly_dir, "PDFs_html_text/")
 pdf_text_folder <- paste0(weekly_dir, "PDFs_to_text/")
 results_folder <- paste0(weekly_dir, "results/")
+tmp_folder <- paste0(weekly_dir, "tmp/")
 
 dir.create(weekly_dir)  
 dir.create(pdf_folder)  
 dir.create(pdf_html_folder)  
 dir.create(pdf_text_folder)  
-dir.create(results_folder)  
+dir.create(results_folder)
+dir.create(tmp_folder)
+
 
 #-----------------------------------------------------------------------------------------------
 # 1 - retrieve newest preprint list
@@ -95,13 +100,5 @@ combine_oddpub_results(oddpub_results_DAS, oddpub_results_full_text, oddpub_resu
 barzooka_results_filename <- paste0(results_folder, 
                                     "covid_barzooka_results_", 
                                     start_date, "_", end_date, ".csv")
-iiif_folder = paste0(start_date, "_", end_date)
-
-#need correct conda environment to run Barzooka script
-use_condaenv("fastai", required = TRUE)
-source_python("barzooka.py")
-barzooka = Barzooka()
-
-barzooka$predict_from_folder(pdf_folder, barzooka_results_filename,
-                             iiif_folder, TRUE, "./tmp/")
+run_barzooka(pdf_folder, tmp_folder, barzooka_results_filename)
 
